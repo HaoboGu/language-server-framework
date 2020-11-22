@@ -1,2 +1,4 @@
 # language-server-framework
-An easy way to create language servers
+A language server framework written in Go which provides an easy way making language servers
+
+##  
