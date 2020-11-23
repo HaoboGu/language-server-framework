@@ -9,15 +9,12 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// Logger is the only logger instance used in the framework
-var Logger *zap.SugaredLogger
-
-// InitLogger initializes the logger for language server
-func InitLogger() {
+// NewLogger initializes a zap logger for language server
+func NewLogger() *zap.SugaredLogger {
 	core := zapcore.NewCore(getEncoder(), getLogWriter(), zapcore.DebugLevel)
 	logger := zap.New(core, zap.AddCaller())
 	// Use SugaredLogger
-	Logger = logger.Sugar()
+	return logger.Sugar()
 }
 
 func getEncoder() zapcore.Encoder {
