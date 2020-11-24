@@ -10,6 +10,7 @@ go get -u github.com/haobogu/lsframework
 Example(go style pesudo code)
 ```go
 type MyServer struct {
+    // Base server is an empty server, it follows LanguageServer interface
     LanguageServerBase
 }
 
