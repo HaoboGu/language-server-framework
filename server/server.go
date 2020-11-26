@@ -4,5 +4,4 @@ package server
 type LanguageServer interface {
 	// TODO: Add behaviors
 	Start() error
-	Init() error
 }
