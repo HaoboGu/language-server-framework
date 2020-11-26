@@ -3,6 +3,8 @@ package jsonrpc
 import (
 	"testing"
 	"time"
+
+	"github.com/haobogu/lsframework/log"
 )
 
 func TestNewClient(t *testing.T) {
@@ -21,12 +23,12 @@ func TestNewClient(t *testing.T) {
 			if got := Call(); got != tt.want {
 				t.Errorf("NewClient() = %v, want %v", got, tt.want)
 			}
-			logger.Info("sleeping")
+			log.Info("sleeping")
 			time.Sleep(1 * time.Second)
 			if got := Call(); got != tt.want {
 				t.Errorf("NewClient() = %v, want %v", got, tt.want)
 			}
-			logger.Info("end call")
+			log.Info("end call")
 		})
 	}
 }

@@ -5,14 +5,12 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/haobogu/lsframework/log"
-
 	"github.com/gorilla/websocket"
+	"github.com/haobogu/lsframework/log"
 	"github.com/sourcegraph/jsonrpc2"
 	websocketjsonrpc2 "github.com/sourcegraph/jsonrpc2/websocket"
 )
 
-var logger = log.NewLogger()
 var c *websocket.Conn
 var resp *http.Response
 var jsonrpcConn *jsonrpc2.Conn
@@ -26,7 +24,7 @@ func NewClient() *jsonrpc2.Conn {
 	var err error
 	c, resp, err = websocket.DefaultDialer.Dial("ws://localhost:18360", nil)
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 	}
 	stream := websocketjsonrpc2.NewObjectStream(c)
 	jsonrpcConn = jsonrpc2.NewConn(ctx, stream, &hb)
@@ -44,9 +42,9 @@ func Close() {
 func Call() string {
 	var result string
 	if err := jsonrpcConn.Call(ctx, "test", testParameter{"sss"}, &result); err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 	}
-	logger.Infof("Received response: %s", result)
+	log.Infof("Received response: %s", result)
 	return result
 }
 
@@ -65,9 +63,9 @@ func (h *testHandlerB) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jso
 	if req.Notif {
 		h.mu.Lock()
 		defer h.mu.Unlock()
-		logger.Info("Handling using testHandlerB")
+		log.Info("Handling using testHandlerB")
 		h.got = append(h.got, string(*req.Params))
 		return
 	}
-	logger.Fatalf("testHandlerB got unexpected request %+v", req)
+	log.Fatalf("testHandlerB got unexpected request %+v", req)
 }
