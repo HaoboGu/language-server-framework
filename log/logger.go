@@ -9,10 +9,68 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// NewLogger initializes a zap logger for language server
-func NewLogger() *zap.SugaredLogger {
+var logger *zap.SugaredLogger = newLogger()
+
+// Info prints info level logs
+func Info(args ...interface{}) {
+	logger.Info(args...)
+}
+
+// Infof prints formatted info level logs
+func Infof(template string, args ...interface{}) {
+	logger.Infof(template, args...)
+}
+
+// Error prints error level logs
+func Error(args ...interface{}) {
+	logger.Error(args...)
+}
+
+// Errorf prints formatted error level logs
+func Errorf(template string, args ...interface{}) {
+	logger.Errorf(template, args...)
+}
+
+// Debug prints debug level logs
+func Debug(args ...interface{}) {
+	logger.Debug(args...)
+}
+
+// Debugf prints formatted debug level logs
+func Debugf(template string, args ...interface{}) {
+	logger.Debugf(template, args...)
+}
+
+// Fatal prints logs and calls os.Exit()
+func Fatal(args ...interface{}) {
+	logger.Fatal(args...)
+}
+
+// Fatalf prints logs and calls os.Exit()
+func Fatalf(template string, args ...interface{}) {
+	logger.Fatalf(template, args...)
+}
+
+// Warn prints warn level logs
+func Warn(args ...interface{}) {
+	logger.Warn(args...)
+}
+
+// Warnf prints formatted warn level logs
+func Warnf(template string, args ...interface{}) {
+	logger.Warnf(template, args...)
+}
+
+// WithLogOption returns a logger with given additional option
+func WithLogOption(option zap.Option) *zap.SugaredLogger {
 	core := zapcore.NewCore(getEncoder(), getLogWriter(), zapcore.DebugLevel)
-	logger := zap.New(core, zap.AddCaller())
+	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(0))
+	return logger.WithOptions(option).Sugar()
+}
+
+func newLogger() *zap.SugaredLogger {
+	core := zapcore.NewCore(getEncoder(), getLogWriter(), zapcore.DebugLevel)
+	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	// Use SugaredLogger
 	return logger.Sugar()
 }

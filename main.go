@@ -8,8 +8,6 @@ import (
 )
 
 func main() {
-	// Init logger
-	logger := log.NewLogger()
 	// Create and start server here
 	var s server.LanguageServer
 	// Create a server config
@@ -20,8 +18,8 @@ func main() {
 	// Start server, waiting for client's connection
 	// Once the connection is established, the server will keep listening the requests and notifications
 	if err := s.Start(); err != nil {
-		logger.Error("The server crashed")
+		log.Error("The server crashed")
 	}
-	logger.Info("The server is shutting down")
+	log.Info("The server is shutting down")
 	os.Exit(0)
 }
