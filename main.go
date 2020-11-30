@@ -9,11 +9,11 @@ import (
 
 func main() {
 	// Create and start server here
-	var s server.LanguageServer
+	var s *server.LanguageServer
 	// Create a server config
 	config := server.Config{}
 	// Replace your server initializer here
-	s = server.NewBaseServer(os.Stdin, os.Stdout, ".", config)
+	s = server.NewBaseServer(34172, ".", config)
 
 	// Start server, waiting for client's connection
 	// Once the connection is established, the server will keep listening the requests and notifications

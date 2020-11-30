@@ -2,9 +2,12 @@ package server
 
 import (
 	"context"
-	"io"
+	"encoding/json"
+	"net"
+	"strconv"
 
 	"github.com/haobogu/lsframework/log"
+	"github.com/haobogu/lsframework/protocol"
 	"github.com/pkg/errors"
 	"github.com/sourcegraph/jsonrpc2"
 )
@@ -15,12 +18,13 @@ type LanguageServer struct {
 	wd          string
 	config      Config
 	initialized bool
+	port        int
 }
 
 // NewBaseServer returns an empty language server
-func NewBaseServer(in io.ReadCloser, out io.WriteCloser, wd string, config Config) *LanguageServer {
+func NewBaseServer(port int, wd string, config Config) *LanguageServer {
 	s := &LanguageServer{
-		conn:        &Connection{in, out},
+		port:        port,
 		wd:          wd,
 		config:      config,
 		initialized: false,
@@ -32,17 +36,32 @@ func NewBaseServer(in io.ReadCloser, out io.WriteCloser, wd string, config Confi
 func (s *LanguageServer) Start() error {
 	log.Info("Starting server...")
 	ctx := context.Background()
-	// Put language server itself as the handler of jsonrpc2 connection
-	jsonrpc2Conn := jsonrpc2.NewConn(ctx, jsonrpc2.NewBufferedStream(s.conn, jsonrpc2.VSCodeObjectCodec{}), s)
-	<-jsonrpc2Conn.DisconnectNotify()
-	if err := s.conn.Close(); err != nil {
-		return errors.Wrap(err, "the server is closed unexpected")
+	lis, err := net.Listen("tcp", "127.0.0.1:"+strconv.Itoa(s.port)) // any available address
+	if err != nil {
+		return errors.Wrap(err, "Cannot listen to tcp")
 	}
-	return nil
+	defer func() {
+		if lis == nil {
+			return // already closed
+		}
+		if err = lis.Close(); err != nil {
+			log.Fatal("An error occurred when closing tcp connection: ", err)
+		}
+	}()
+
+	// Listen
+	for {
+		conn, err := lis.Accept()
+		if err != nil {
+			return err
+		}
+		jsonrpc2.NewConn(ctx, jsonrpc2.NewBufferedStream(conn, jsonrpc2.VSCodeObjectCodec{}), s)
+	}
 }
 
 // Handle dilivers incoming requests and notifications
 func (s *LanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+	log.Info("handling: ", req.Method)
 	// Check whether the server is initialized
 	if req.Method != "initialize" && !s.initialized {
 		log.Error("the server needs to be initialized")
@@ -51,8 +70,22 @@ func (s *LanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *j
 	// Handle requests and notifications
 	switch req.Method {
 	case "initialize":
+		// TODO: tidy
+		log.Info("case initialize")
+		var param protocol.InitializeParams
+		json.Unmarshal(*req.Params, &param)
+		log.Infof("param: %+v", param)
 		if s.initialized {
 			log.Error("the server is already initialized")
 		}
+		conn.Reply(ctx, req.ID, protocol.InitializeResult{
+			ServerInfo: struct {
+				Name    string `json:"name"`
+				Version string `json:"version,omitempty"`
+			}{
+				"name",
+				"0.0.1",
+			},
+		})
 	}
 }
