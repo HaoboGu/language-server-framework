@@ -1,17 +1,17 @@
-package client
+package myserver
 
 import (
 	"testing"
 
+	"github.com/haobogu/lsframework/client"
 	"github.com/haobogu/lsframework/log"
 	"github.com/haobogu/lsframework/protocol"
 	"github.com/haobogu/lsframework/server"
 )
 
-func Test_Client(t *testing.T) {
-	port := 34625
-	go startServer(port)
-	client := NewClient(port)
+func TestMyServer_Completion(t *testing.T) {
+	go startServer(46324)
+	client := client.NewClient(46324)
 	initParam := protocol.InitializeParams{
 		WorkspaceFoldersInitializeParams: protocol.WorkspaceFoldersInitializeParams{
 			WorkspaceFolders: []protocol.WorkspaceFolder{{
@@ -26,13 +26,15 @@ func Test_Client(t *testing.T) {
 		log.Error("call failed:", err)
 	}
 	log.Infof("Initialize result: %+v", got)
+	if err := client.Call("completion", nil, nil); err != nil {
+		log.Error(err)
+	}
+	log.Info("Closing")
 	client.Close()
 }
 
 func startServer(port int) {
-	var s *server.LanguageServer
-	config := server.Config{}
-	s = server.NewBaseServer(port, ".", config, server.BaseProcessor{})
+	s := server.NewBaseServer(port, ".", server.Config{}, MyProcessor{})
 	if err := s.Start(); err != nil {
 		log.Error("The server crashed")
 	}

@@ -12,8 +12,17 @@ import (
 	"github.com/sourcegraph/jsonrpc2"
 )
 
-// LanguageServer is an empty server
+type Processor interface {
+	Completion()
+}
+
 type LanguageServer struct {
+	ServerManager
+	Processor
+}
+
+// ServerManager is an empty server
+type ServerManager struct {
 	conn        *Connection
 	wd          string
 	config      Config
@@ -22,14 +31,17 @@ type LanguageServer struct {
 }
 
 // NewBaseServer returns an empty language server
-func NewBaseServer(port int, wd string, config Config) *LanguageServer {
-	s := &LanguageServer{
+func NewBaseServer(port int, wd string, config Config, processor Processor) *LanguageServer {
+	p := ServerManager{
 		port:        port,
 		wd:          wd,
 		config:      config,
 		initialized: false,
 	}
-	return s
+	return &LanguageServer{
+		ServerManager: p,
+		Processor:     processor,
+	}
 }
 
 // Start starts the server and listen
@@ -78,6 +90,7 @@ func (s *LanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *j
 		if s.initialized {
 			log.Error("the server is already initialized")
 		}
+		s.initialized = true
 		conn.Reply(ctx, req.ID, protocol.InitializeResult{
 			ServerInfo: struct {
 				Name    string `json:"name"`
@@ -87,5 +100,8 @@ func (s *LanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *j
 				"0.0.1",
 			},
 		})
+	case "completion":
+		s.Processor.Completion()
+		conn.Reply(ctx, req.ID, nil)
 	}
 }

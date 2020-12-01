@@ -11,40 +11,19 @@ Example(go style pesudo code)
 ```go
 import "github.com/haobogu/lsframework/server"
 
-type MyServer struct {
-    // Base server is an empty server
-    server.LanguageServer
-}
+// Create your own processor
+type MyProcessor struct {}
 
-func NewMyServer(port int, wd string, config server.Config) *MyServer {
-    s := MyServer{
-        LanguageServerBase: lsframework.NewBaseServer(port, wd, config)
-    }
-}
+// Implement server.Processor interface
+...
+...
 
-func (MyServer *s) Initialize(params InitializeParams) {
-    // Do initialization
-}
+// Pass your processor to server host
+s := server.NewBaseServer(port, ".", server.Config{}, MyProcessor{})
 
-func (MyServer *s) Completion(param CompletionParams) {
-    // Your completion code
-}
-
-func Main() {
-    config := lsframework.DefaultConfig
-    // Your server will listen to this port via tcp
-    port := 12345 
-    // Your server's working directory
-    wd := "/"
-    server := NewMyServer(port, wd, config)
-
-    // Start server, waiting for client's connection
-    // Once the connection is established, the server will keep listening the requests and notifications
-    if err:= server.Start(); err != nil {
-        log.Error("The server crashed")
-    }
-    log.Info("The server is shut down")
-    os.Exit(0)
+// Start your server
+if err := s.Start(); err != nil {
+    log.Error("The server crashed")
 }
 ```
 

@@ -42,6 +42,10 @@ func testClient(ctx context.Context, t *testing.T, stream jsonrpc2.ObjectStream)
 	if err := cc.Call(ctx, "initialize", initParam, &got); err != nil {
 		t.Fatal(err)
 	}
+
+	if err := cc.Call(ctx, "completion", initParam, &got); err != nil {
+		t.Fatal(err)
+	}
 	log.Infof("Initialize result: %+v", got)
 }
 
