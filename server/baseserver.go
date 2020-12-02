@@ -12,17 +12,19 @@ import (
 	"github.com/sourcegraph/jsonrpc2"
 )
 
+// LanguageServer defines all functions of a server
 type LanguageServer interface {
 	Completion()
 }
 
+// LanguageServerHost equals manager + server
 type LanguageServerHost struct {
-	ServerManager
+	LanguageServerManager
 	LanguageServer
 }
 
-// ServerManager is an empty server
-type ServerManager struct {
+// LanguageServerManager contains non-lsp-functional parts, such as connection, configuration, etc.
+type LanguageServerManager struct {
 	conn        *Connection
 	wd          string
 	config      Config
@@ -30,17 +32,17 @@ type ServerManager struct {
 	port        int
 }
 
-// NewBaseServer returns an empty language server
-func NewBaseServer(port int, wd string, config Config, processor LanguageServer) *LanguageServerHost {
-	p := ServerManager{
+// NewServerHost returns an empty language server
+func NewServerHost(port int, wd string, config Config, server LanguageServer) *LanguageServerHost {
+	p := LanguageServerManager{
 		port:        port,
 		wd:          wd,
 		config:      config,
 		initialized: false,
 	}
 	return &LanguageServerHost{
-		ServerManager:  p,
-		LanguageServer: processor,
+		LanguageServerManager: p,
+		LanguageServer:        server,
 	}
 }
 

@@ -2,8 +2,10 @@ package server
 
 import "github.com/haobogu/lsframework/log"
 
-type BaseProcessor struct{}
+// EmptyLanguageServer is an empty server
+type EmptyLanguageServer struct{}
 
-func (s *BaseProcessor) Completion() {
-	log.Info("base server's completion")
+// Completion does nothings
+func (s *EmptyLanguageServer) Completion() {
+	log.Info("empty server's completion")
 }
