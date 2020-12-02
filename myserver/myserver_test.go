@@ -34,7 +34,7 @@ func TestMyServer_Completion(t *testing.T) {
 }
 
 func startServer(port int) {
-	s := server.NewBaseServer(port, ".", server.Config{}, MyProcessor{})
+	s := server.NewBaseServer(port, ".", server.Config{}, &MyServer{})
 	if err := s.Start(); err != nil {
 		log.Error("The server crashed")
 	}

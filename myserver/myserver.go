@@ -4,9 +4,9 @@ import (
 	"github.com/haobogu/lsframework/log"
 )
 
-type MyProcessor struct {
+type MyServer struct {
 }
 
-func (m MyProcessor) Completion() {
+func (m *MyServer) Completion() {
 	log.Info("my completion")
 }

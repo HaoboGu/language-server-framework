@@ -12,13 +12,13 @@ import (
 	"github.com/sourcegraph/jsonrpc2"
 )
 
-type Processor interface {
+type LanguageServer interface {
 	Completion()
 }
 
-type LanguageServer struct {
+type LanguageServerHost struct {
 	ServerManager
-	Processor
+	LanguageServer
 }
 
 // ServerManager is an empty server
@@ -31,21 +31,21 @@ type ServerManager struct {
 }
 
 // NewBaseServer returns an empty language server
-func NewBaseServer(port int, wd string, config Config, processor Processor) *LanguageServer {
+func NewBaseServer(port int, wd string, config Config, processor LanguageServer) *LanguageServerHost {
 	p := ServerManager{
 		port:        port,
 		wd:          wd,
 		config:      config,
 		initialized: false,
 	}
-	return &LanguageServer{
-		ServerManager: p,
-		Processor:     processor,
+	return &LanguageServerHost{
+		ServerManager:  p,
+		LanguageServer: processor,
 	}
 }
 
 // Start starts the server and listen
-func (s *LanguageServer) Start() error {
+func (s *LanguageServerHost) Start() error {
 	log.Info("Starting server...")
 	ctx := context.Background()
 	lis, err := net.Listen("tcp", "127.0.0.1:"+strconv.Itoa(s.port)) // any available address
@@ -72,7 +72,7 @@ func (s *LanguageServer) Start() error {
 }
 
 // Handle dilivers incoming requests and notifications
-func (s *LanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
+func (s *LanguageServerHost) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
 	log.Info("handling: ", req.Method)
 	// Check whether the server is initialized
 	if req.Method != "initialize" && !s.initialized {
@@ -101,7 +101,7 @@ func (s *LanguageServer) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *j
 			},
 		})
 	case "completion":
-		s.Processor.Completion()
+		s.LanguageServer.Completion()
 		conn.Reply(ctx, req.ID, nil)
 	}
 }

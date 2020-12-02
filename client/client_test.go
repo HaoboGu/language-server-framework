@@ -30,9 +30,9 @@ func Test_Client(t *testing.T) {
 }
 
 func startServer(port int) {
-	var s *server.LanguageServer
+	var s *server.LanguageServerHost
 	config := server.Config{}
-	s = server.NewBaseServer(port, ".", config, server.BaseProcessor{})
+	s = server.NewBaseServer(port, ".", config, &server.BaseProcessor{})
 	if err := s.Start(); err != nil {
 		log.Error("The server crashed")
 	}
