@@ -32,7 +32,7 @@ func Test_Client(t *testing.T) {
 func startServer(port int) {
 	var s *server.LanguageServerHost
 	config := server.Config{}
-	s = server.NewServerHost(port, ".", config, &server.EmptyLanguageServer{})
+	s = server.NewServerHost(port, ".", config, &server.BaseLanguageServer{})
 	if err := s.Start(); err != nil {
 		log.Error("The server crashed")
 	}
